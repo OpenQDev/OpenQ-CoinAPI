@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
                 const coinPrice = result.data[token]["usd"];
                 client.setex(token, 600, coinPrice);
                 res.status(200).send({
-                    price: coinPrice,
+                    price: coinPrice.toString(),
                     message: "cache miss"
                 });
             }
