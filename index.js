@@ -13,7 +13,7 @@ client.on("error", (err) => {
 const PORT = 8081;
 const app = express();
 
-app.get('/price', (req, res) => {
+app.get('/', (req, res) => {
     const token = req.query.token;
     try {
         client.get(token, async (err, price) => {
