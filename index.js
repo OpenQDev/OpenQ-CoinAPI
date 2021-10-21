@@ -1,9 +1,10 @@
 const express = require('express');
 const redis = require("redis");
 const axios = require("axios");
+require("dotenv").config();
 
 const redisPort = 6379;
-const client = redis.createClient(redisPort);
+const client = redis.createClient(redisPort, process.env.REDIS_URL);
 
 client.on("error", (err) => {
     console.log(err);
@@ -25,7 +26,6 @@ app.get('/price', (req, res) => {
                 });
             } else {
                 const result = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${token}&vs_currencies=usd`);
-                console.log(result);
                 const coinPrice = result.data[token]["usd"];
                 client.setex(token, 600, coinPrice);
                 res.status(200).send({
