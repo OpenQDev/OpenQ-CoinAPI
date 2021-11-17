@@ -21,7 +21,6 @@ app.use(express.json());
 */
 app.get('/', (req, res) => {
 	const token = req.query.token;
-	console.log('token: ', token);
 	try {
 		client.get(token, async (err, price) => {
 			if (err) throw err;
@@ -55,13 +54,13 @@ app.get('/ids', async (req, res) => {
 });
 
 app.post('/cache', async (req, res) => {
-	const token = JSON.parse(req.query.token);
+	const token = req.query.token;
 	client.setex(token, 600, 1234);
 	res.send(`Set ${token} to price of 1234`);
 });
 
 app.get('/cache', async (req, res) => {
-	const token = JSON.parse(req.query.token);
+	const token = req.query.token;
 	await client.get(token, (err, price) => {
 		res.json(price);
 	});
@@ -69,20 +68,17 @@ app.get('/cache', async (req, res) => {
 
 // This only ever makes at most 1 CoinGecko request
 app.post('/tvl', async (req, res) => {
-	const { tokenVolumes } = req.body;
-	console.log(tokenVolumes);
+	// Map of token to balances like {"ethereum": 0.4, "bitcoin": "0.003"}
+	const tokenBalances = req.body;
 
-	if (!req.query.tokens) {
-		res.status(403).json({ error: 'missing tokens' });
-		return;
+	if (Object.keys(tokenBalances).length == 0) {
+		return res.status(403).json({ error: 'missing tokens' });
 	}
-	console.log(req.query.tokens);
-	const tokens = JSON.parse(req.query.tokens);
-	console.log(typeof tokens);
+
+	const tokens = Object.keys(tokenBalances);
 
 	if (!Array.isArray(tokens) || tokens.length === 0) {
-		res.status(403).json({ error: 'token must not be empty' });
-		return;
+		return res.status(403).json({ error: 'token must not be empty' });
 	}
 
 	// Fetch any token price you can from cache
@@ -90,28 +86,37 @@ app.post('/tvl', async (req, res) => {
 	let cachedTokenPrices = {};
 	await Promise.all(tokens.map(async (token) => {
 		const price = await fetchCachedToken(client, token);
+
+		// price will be null if there's an error or cache miss
 		if (price != null) {
 			cachedTokenPrices[token] = {};
+			// For later merging with fetched token prices, we must reflect CoinGeckos return object
 			cachedTokenPrices[token]['usd'] = price;
 		} else {
 			remainingTokens.push(token);
 		}
 	}));
 
-	// For the remaining tokens, fetch them all at once
+	// For the remaining tokens which were not in cache, fetch them all with a single call
 	const fetchedTokenPrices = await fetchCoinGeckoPrices(client, remainingTokens);
-	// Merge the cached and fetched tokens into a single object
+
+	// Merge the cached and fetched token prices into a single object
 	const tokenPriceMap = Object.assign(cachedTokenPrices, fetchedTokenPrices);
 
-	// Prepare the result object of { tokens: {'token': usd: { 0.000 } }, total: 123.32 }
-	// Not bad to keep usd, as we may provide Euro based on zone in the future
+	// Now multiply each token's USD value by the volume of that token
+	let usdValuePerCoin = {};
+	for (const [key, value] of Object.entries(tokenPriceMap)) {
+		usdValuePerCoin[key] = value.usd * tokenBalances[key];
+	}
+
+	// Prepare the result object for return
 	let result = {};
-	result['tokens'] = tokenPriceMap;
+	result['tokens'] = usdValuePerCoin;
 
 	// Throw in the total while we're at it...
-	result['total'] = tallyTvl(tokenPriceMap, tokenVolumes); // use reduce to sum all values in tokenPriceMap
+	result['total'] = tallyTvl(usdValuePerCoin);
 
-	res.json(result);
+	return res.json(result);
 });
 
 app.listen(PORT);

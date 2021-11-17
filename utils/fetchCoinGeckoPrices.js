@@ -1,9 +1,5 @@
 const axios = require('axios');
 
-function isEmpty(object) {
-	return Object.keys(object).length === 0;
-}
-
 async function fetchCoinGeckoPrices(client, tokens) {
 	const stringifiedTokens = tokens.join(',');
 	const url = `https://api.coingecko.com/api/v3/simple/price?ids=${stringifiedTokens}&vs_currencies=usd`;
