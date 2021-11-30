@@ -2,6 +2,7 @@ const express = require('express');
 const redis = require('redis');
 const axios = require('axios');
 const cors = require('cors');
+
 require('dotenv').config();
 
 const redisPort = 6379;
@@ -74,16 +75,23 @@ app.get('/cache', async (req, res) => {
 // This only ever makes at most 1 CoinGecko request
 app.post('/tvl', async (req, res) => {
 	// Map of token to balances like {"ethereum": 0.4, "bitcoin": "0.003"}
-	console.log('request triggered', req.body);
-	const tokenBalances = req.body;
+	const tokenVolumesRaw = req.body.tokenVolumes;
 
-	if (Object.keys(tokenBalances).length == 0) {
+	var key, keys = Object.keys(tokenVolumesRaw);
+	var n = keys.length;
+	var tokenVolumes = {};
+	while (n--) {
+		key = keys[n];
+		tokenVolumes[key.toLocaleLowerCase()] = tokenVolumesRaw[key];
+	}
+
+	if (Object.keys(tokenVolumes).length == 0) {
 		return res.status(403).json({ error: 'missing tokens' });
 	}
 
-	const tokens = Object.keys(tokenBalances);
+	const tokenAddresses = Object.keys(tokenVolumes);
 
-	if (!Array.isArray(tokens) || tokens.length === 0) {
+	if (!Array.isArray(tokenAddresses) || tokenAddresses.length === 0) {
 		return res.status(403).json({ error: 'token must not be empty' });
 	}
 
@@ -91,16 +99,16 @@ app.post('/tvl', async (req, res) => {
 	let remainingTokens = [];
 	let cachedTokenPrices = {};
 	await Promise.all(
-		tokens.map(async (token) => {
-			const price = await fetchCachedToken(client, token);
+		tokenAddresses.map(async (tokenAddress) => {
+			const price = await fetchCachedToken(client, tokenAddress);
 
 			// price will be null if there's an error or cache miss
 			if (price != null) {
-				cachedTokenPrices[token] = {};
+				cachedTokenPrices[tokenAddress] = {};
 				// For later merging with fetched token prices, we must reflect CoinGeckos return object
-				cachedTokenPrices[token]['usd'] = price;
+				cachedTokenPrices[tokenAddress]['usd'] = price;
 			} else {
-				remainingTokens.push(token);
+				remainingTokens.push(tokenAddress);
 			}
 		})
 	);
@@ -117,7 +125,7 @@ app.post('/tvl', async (req, res) => {
 	// Now multiply each token's USD value by the volume of that token
 	let usdValuePerCoin = {};
 	for (const [key, value] of Object.entries(tokenPriceMap)) {
-		usdValuePerCoin[key] = value.usd * tokenBalances[key];
+		usdValuePerCoin[key] = value.usd * tokenVolumes[key];
 	}
 
 	// Prepare the result object for return

@@ -2,9 +2,11 @@ const axios = require('axios');
 
 async function fetchCoinGeckoPrices(client, tokens) {
 	const stringifiedTokens = tokens.join(',');
-	const url = `https://api.coingecko.com/api/v3/simple/price?ids=${stringifiedTokens}&vs_currencies=usd`;
+	console.log(stringifiedTokens);
+	const url = `https://api.coingecko.com/api/v3/simple/token_price/polygon-pos?contract_addresses=${stringifiedTokens}&vs_currencies=usd`;
 	try {
 		const { data } = await axios.get(url);
+
 		for (const [key, value] of Object.entries(data)) {
 			client.setex(key, 600, value['usd']);
 		}
