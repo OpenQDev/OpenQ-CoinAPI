@@ -2,6 +2,7 @@ const express = require('express');
 const redis = require('redis');
 const axios = require('axios');
 const cors = require('cors');
+const ethers = require('ethers');
 
 require('dotenv').config();
 
@@ -126,7 +127,7 @@ app.post('/tvl', async (req, res) => {
 		// Now multiply each token's USD value by the volume of that token
 		let usdValuePerCoin = {};
 		for (const [key, value] of Object.entries(tokenPriceMap)) {
-			usdValuePerCoin[key] = value.usd * tokenVolumes[key];
+			usdValuePerCoin[key] = value.usd * (tokenVolumes[key].toNumber() / Math.pow(10, 18));
 		}
 
 		// Prepare the result object for return
