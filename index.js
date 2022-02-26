@@ -1,15 +1,16 @@
 const express = require('express');
+const cors = require('cors');
 const redis = require('redis');
 const axios = require('axios');
-const cors = require('cors');
-
-require('dotenv').config();
-
-const redisPort = 6379;
-const client = redis.createClient(redisPort, process.env.REDIS_URL);
 const fetchCachedToken = require('./utils/fetchCachedToken.js');
 const fetchCoinGeckoPrices = require('./utils/fetchCoinGeckoPrices.js');
 const tallyTvl = require('./utils/tallyTvl');
+
+require('dotenv').config();
+
+// Prepare Redis
+const redisPort = 6379;
+const client = redis.createClient(redisPort, process.env.REDIS_URL);
 
 client.on('error', (err) => {
 	console.log(err);
@@ -19,10 +20,6 @@ const PORT = 8081;
 const app = express();
 
 app.use(express.json());
-/* Get individual token price
-	TODO add error cases like in TVL if this API endpoint is going to be used
-*/
-
 app.use(cors({ origin: process.env.ORIGIN_URL }));
 
 app.get('/', (req, res) => {
@@ -72,7 +69,6 @@ app.get('/cache', async (req, res) => {
 	});
 });
 
-// This only ever makes at most 1 CoinGecko request
 app.post('/tvl', async (req, res) => {
 	try {
 		// Map of token to balances like {"ethereum": 0.4, "bitcoin": "0.003"}
