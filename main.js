@@ -1,12 +1,11 @@
-const fetchCachedToken = require('./utils/fetchCachedToken.js');
-const fetchCoinGeckoPrices = require('./utils/fetchCoinGeckoPrices.js');
 const tallyTvl = require('./utils/tallyTvl');
 
-const main = (client, req) => {
+const main = (req, client, fetchCoinGeckoPrices, fetchCachedToken) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const tokenVolumesRaw = req.body.tokenVolumes;
 			const network = req.body.network;
+			console.log(network);
 
 			var key, keys = Object.keys(tokenVolumesRaw);
 			var n = keys.length;
@@ -67,8 +66,6 @@ const main = (client, req) => {
 			let result = {};
 			result['tokenPrices'] = individualTokenPrices;
 			result['tokens'] = usdValuePerCoin;
-
-			// Throw in the total while we're at it...
 			result['total'] = tallyTvl(usdValuePerCoin);
 
 			return resolve(result);

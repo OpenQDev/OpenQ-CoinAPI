@@ -4,7 +4,7 @@ function tallyTvl(tokenPriceMap) {
 		// Apparently Math.round is like 100x faster than .toFixed(2)
 		total += Math.round(parseFloat(value) * 100) / 100;
 	}
-	return total;
+	return Math.round(total * 100) / 100;
 }
 
 module.exports = tallyTvl;

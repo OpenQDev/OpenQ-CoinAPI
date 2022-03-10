@@ -3,6 +3,8 @@ const cors = require('cors');
 const redis = require('redis');
 const axios = require('axios');
 const main = require('./main');
+const fetchCoinGeckoPrices = require('./utils/fetchCoinGeckoPrices.js');
+const fetchCachedToken = require('./utils/fetchCachedToken.js');
 
 require('dotenv').config();
 
@@ -69,7 +71,7 @@ app.get('/cache', async (req, res) => {
 
 app.post('/tvl', async (req, res) => {
 	try {
-		const result = await main(client, req);
+		const result = await main(req, client, fetchCoinGeckoPrices, fetchCachedToken);
 		res.json(result);
 	} catch (error) {
 		res.status(403).json(error);
