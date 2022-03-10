@@ -19,6 +19,8 @@ const main = (client, req) => {
 			}
 
 			const tokenAddresses = Object.keys(tokenVolumes);
+			console.log(tokenVolumesRaw);
+			console.log(tokenAddresses);
 
 			if (!Array.isArray(tokenAddresses) || tokenAddresses.length === 0) {
 				return reject({ error: 'token must not be empty' });
@@ -42,24 +44,31 @@ const main = (client, req) => {
 				})
 			);
 
+			console.log(remainingTokens);
+
 			// For the remaining tokens which were not in cache, fetch them all with a single call
 			const fetchedTokenPrices = await fetchCoinGeckoPrices(
 				client,
 				remainingTokens
 			);
+			console.log(fetchedTokenPrices);
 
 			// Merge the cached and fetched token prices into a single object
 			const tokenPriceMap = Object.assign(cachedTokenPrices, fetchedTokenPrices);
+			console.log(tokenPriceMap);
 
 			// Now multiply each token's USD value by the volume of that token
 			let usdValuePerCoin = {};
+			let individualTokenPrices = {};
 			for (const [key, value] of Object.entries(tokenPriceMap)) {
 				const multiplier = tokenVolumes[key] / Math.pow(10, 18);
 				usdValuePerCoin[key] = value.usd * multiplier;
+				individualTokenPrices[key] = Math.round(parseFloat(value.usd) * 100) / 100;
 			}
 
 			// Prepare the result object for return
 			let result = {};
+			result['tokenPrices'] = individualTokenPrices;
 			result['tokens'] = usdValuePerCoin;
 
 			// Throw in the total while we're at it...
