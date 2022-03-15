@@ -5,7 +5,6 @@ const main = (req, client, fetchCoinGeckoPrices, fetchCachedToken) => {
 		try {
 			const tokenVolumesRaw = req.body.tokenVolumes;
 			const network = req.body.network;
-			console.log(network);
 
 			var key, keys = Object.keys(tokenVolumesRaw);
 			var n = keys.length;
