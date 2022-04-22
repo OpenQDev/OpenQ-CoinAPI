@@ -7,7 +7,7 @@ It uses a Redis cache to lower our API usage and provide faster results
 ## Getting Started
 
 ### Boot Redis
- 
+
 The easiest way to boot Redis locally is with Docker.
 
 ```bash
