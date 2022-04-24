@@ -14,6 +14,7 @@ The easiest way to boot Redis locally is with Docker.
 docker run --name redis -d -p 6379:6379 redis:6.2.6-alpine
 ```
 
+
 ### Update OpenQ-CoinAPI .env
 
 Set the `REDIS_URL` environment variable to `localhost` in `.env`
