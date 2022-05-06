@@ -56,7 +56,18 @@ const main = (req, client, fetchCoinGeckoPrices, fetchCachedToken) => {
 			let usdValuePerCoin = {};
 			let individualTokenPrices = {};
 			for (const [key, value] of Object.entries(tokenPriceMap)) {
-				const multiplier = tokenVolumes[key] / Math.pow(10, 18);
+				console.log(key);
+				let decimals;
+
+				if (key == "0x2791bca1f2de4661ed88a30c99a7a9449aa84174") {
+					decimals = 6;
+				} else if (key == "0xc2132d05d31c914a87c6611c10748aeb04b58e8f") {
+					decimals = 6;
+				} else {
+					decimals = 18;
+				}
+
+				const multiplier = tokenVolumes[key] / Math.pow(10, decimals);
 				usdValuePerCoin[key] = value.usd * multiplier;
 				individualTokenPrices[key] = Math.round(parseFloat(value.usd) * 100) / 100;
 			}
