@@ -22,53 +22,6 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: process.env.ORIGIN_URL }));
 
-app.get('/', (req, res) => {
-	const token = req.query.token;
-	try {
-		client.get(token, async (err, price) => {
-			if (err) throw err;
-
-			if (price) {
-				res.status(200).send({
-					price,
-					message: 'data retrieved from the cache',
-				});
-			} else {
-				const result = await axios.get(
-					`https://api.coingecko.com/api/v3/simple/price?ids=${token}&vs_currencies=usd`
-				);
-				const coinPrice = result.data[token]['usd'];
-				client.setex(token, 600, coinPrice);
-				res.status(200).send({
-					price: coinPrice.toString(),
-					message: 'cache miss',
-				});
-			}
-		});
-	} catch (err) {
-		res.status(500).send({ message: err.message });
-	}
-});
-
-app.get('/ids', async (req, res) => {
-	const url = 'https://api.coingecko.com/api/v3/coins/list';
-	const { data } = await axios.get(url);
-	res.json(data);
-});
-
-app.post('/cache', async (req, res) => {
-	const token = req.query.token;
-	client.setex(token, 600, 1234);
-	res.send(`Set ${token} to price of 1234`);
-});
-
-app.get('/cache', async (req, res) => {
-	const token = req.query.token;
-	await client.get(token, (err, price) => {
-		res.json(price);
-	});
-});
-
 app.post('/tvl', async (req, res) => {
 	try {
 		const result = await main(req, client, fetchCoinGeckoPrices, fetchCachedToken);
