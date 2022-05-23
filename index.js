@@ -31,6 +31,39 @@ app.post('/tvl', async (req, res) => {
 	}
 });
 
+app.get("/tokenMetadata", async (req, res) =>{	
+	try {
+		const {query} = req;
+		const cursor = parseInt(query.cursor)
+		const limit = parseInt(query.limit)		
+		 await client.zrange("tokenList", cursor, cursor+limit-1, async(err, data)=>{
+			if(err){
+				throw(err)			
+			}
+			res.json( data.map(token=>JSON.parse(token)))
+		}
+		);	
+}
+	catch (error) {
+		res.status(500).send({ message: err.message });
+	}})
+
+	
+app.get("/tokenMetadata/:address", async (req, res) =>{	
+	try {
+		
+		 await client.hget("tokenObject", req.params.address,  async(err, data)=>{
+			if(err){
+				throw(err)			
+			}
+			res.json({[req.params.address]: JSON.parse(data)})
+		}
+		);	
+}
+	catch (error) {
+		res.status(500).send({ message: error.message });
+	}})
+
 app.listen(PORT);
 
 console.log(`Listening on ${PORT}`);
