@@ -15,10 +15,8 @@ const metadata = async (req, client) => {
 			const paginatedTokens = fetchedMetadata.filter((elem, index) => {
 				return index >= cursor && index < limit + cursor;
 			});
-			tokenMetadata = paginatedTokens;
-			console.log(paginatedTokens)			
+			tokenMetadata = paginatedTokens;		
 		}
-		console.log(tokenMetadata)
 		resolve(tokenMetadata);
 	});
 	return promise;
