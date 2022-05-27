@@ -8,17 +8,17 @@ const fetchMetadata = require('./utils/fetchMetadata')
 
 const metadata = async (client, address) => {
   const promise = new Promise(async (resolve, reject) => {
-    let tokenMetadata;
-    cachedMetadata = await fetchCachedToken(client, address);
-    tokenMetadata = cachedMetadata;
-      if (!metadata) {
-        metadata = fetchedMetadata.find(
-          tokenData => tokenData.address === address.toLowerCase()
-        )
-      }
+    let tokenMetadata
+    const cachedMetadata = await fetchCachedToken(client, address)
+    tokenMetadata = cachedMetadata
+    if (!metadata) {
+      const fetchedMetadata = await fetchMetadata(client)
+      metadata = fetchedMetadata.find(
+        tokenData => tokenData.address === address.toLowerCase()
+      )
+    }
     if (!tokenMetadata) {
       const checkSummedAddress = ethers.utils.getAddress(address)
-      const fetchedMetadata = await fetchMetadata(client)
       let metadata = {}
       switch (process.env.DEPLOY_ENV) {
         case 'mainnet':
@@ -41,8 +41,13 @@ const metadata = async (client, address) => {
           path: '/ERC20.svg'
         }
       }
-      
-      tokenMetadata = { [checkSummedAddress]: {...metadata, address: ethers.utils.getAddress(metadata.address)} }
+
+      tokenMetadata = {
+        [checkSummedAddress]: {
+          ...metadata,
+          address: ethers.utils.getAddress(metadata.address)
+        }
+      }
     }
     resolve(tokenMetadata)
   })
