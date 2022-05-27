@@ -11,6 +11,11 @@ const metadata = async (client, address) => {
     let tokenMetadata;
     cachedMetadata = await fetchCachedToken(client, address);
     tokenMetadata = cachedMetadata;
+      if (!metadata) {
+        metadata = fetchedMetadata.find(
+          tokenData => tokenData.address === address.toLowerCase()
+        )
+      }
     if (!tokenMetadata) {
       const checkSummedAddress = ethers.utils.getAddress(address)
       const fetchedMetadata = await fetchMetadata(client)
@@ -25,11 +30,6 @@ const metadata = async (client, address) => {
 
         case 'local':
           metadata = localTokenMetadata[checkSummedAddress]
-      }
-      if (!metadata) {
-        metadata = fetchedMetadata.find(
-          tokenData => tokenData.address === address.toLowerCase()
-        )
       }
       if (!metadata) {
         metadata = {
