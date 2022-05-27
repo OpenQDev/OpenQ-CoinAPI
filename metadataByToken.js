@@ -3,33 +3,39 @@ const mumbaiTokenMetadata = require('./constants/polygon-mumbai.json')
 const localTokenMetadata = require('./constants/local.json')
 const ethers = require('ethers')
 
-const fetchCachedToken = require('./utils/fetchCachedMetadata')
+const cachedMetadataByToken = require('./utils/cachedMetadataByToken')
 const fetchMetadata = require('./utils/fetchMetadata')
 
 const metadata = async (client, address) => {
   const promise = new Promise(async (resolve, reject) => {
-    let tokenMetadata;
-    cachedMetadata = await fetchCachedToken(client, address);
-    tokenMetadata = cachedMetadata;
+    try {
+      const checkSummedAddress = ethers.utils.getAddress(address)
+      let metadata = await cachedMetadataByToken(client, checkSummedAddress)
       if (!metadata) {
+        const fetchedMetadata = await fetchMetadata(client)
+        fetchedMetadata.forEach(async token => {
+          await client.hmset(
+            'tokenObject',
+            token.address,
+            JSON.stringify(token)
+          )
+        })
         metadata = fetchedMetadata.find(
           tokenData => tokenData.address === address.toLowerCase()
         )
       }
-    if (!tokenMetadata) {
-      const checkSummedAddress = ethers.utils.getAddress(address)
-      const fetchedMetadata = await fetchMetadata(client)
-      let metadata = {}
-      switch (process.env.DEPLOY_ENV) {
-        case 'mainnet':
-          metadata = polygonMainnetTokenMetadata[checkSummedAddress]
-          break
-        case 'mumbai':
-          metadata = mumbaiTokenMetadata[checkSummedAddress]
-          break
+      if (!metadata) {
+        switch (process.env.DEPLOY_ENV) {
+          case 'mainnet':
+            metadata = polygonMainnetTokenMetadata[checkSummedAddress]
+            break
+          case 'mumbai':
+            metadata = mumbaiTokenMetadata[checkSummedAddress]
+            break
 
-        case 'local':
-          metadata = localTokenMetadata[checkSummedAddress]
+          case 'local':
+            metadata = localTokenMetadata[checkSummedAddress]
+        }
       }
       if (!metadata) {
         metadata = {
@@ -41,10 +47,17 @@ const metadata = async (client, address) => {
           path: '/ERC20.svg'
         }
       }
-      
-      tokenMetadata = { [checkSummedAddress]: {...metadata, address: ethers.utils.getAddress(metadata.address)} }
+      const tokenMetadata = {
+        [checkSummedAddress]: {
+          ...metadata,
+          address: ethers.utils.getAddress(metadata.address)
+        }
+      }
+      resolve(tokenMetadata)
+    } catch (err) {
+      console.log(err)
+      reject(err)
     }
-    resolve(tokenMetadata)
   })
   return promise
 }
