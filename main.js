@@ -9,9 +9,12 @@ const main = (req, client, fetchCoinGeckoPrices, fetchCachedToken) => {
 			var key, keys = Object.keys(tokenVolumesRaw);
 			var n = keys.length;
 			var tokenVolumes = {};
+			const tokenDecimals = {}
 			while (n--) {
 				key = keys[n];
-				tokenVolumes[key.toLocaleLowerCase()] = tokenVolumesRaw[key];
+				tokenVolumes[key.toLocaleLowerCase()] = tokenVolumesRaw[key].volume;
+				tokenDecimals[key.toLocaleLowerCase()] = tokenVolumesRaw[key].decimals;
+
 			}
 
 			if (Object.keys(tokenVolumes).length == 0) {
@@ -56,16 +59,9 @@ const main = (req, client, fetchCoinGeckoPrices, fetchCachedToken) => {
 			let usdValuePerCoin = {};
 			let individualTokenPrices = {};
 			for (const [key, value] of Object.entries(tokenPriceMap)) {
-				console.log(key);
-				let decimals;
+			
 
-				if (key == "0x2791bca1f2de4661ed88a30c99a7a9449aa84174") {
-					decimals = 6;
-				} else if (key == "0xc2132d05d31c914a87c6611c10748aeb04b58e8f") {
-					decimals = 6;
-				} else {
-					decimals = 18;
-				}
+				let decimals = tokenDecimals[key];
 
 				const multiplier = tokenVolumes[key] / Math.pow(10, decimals);
 				usdValuePerCoin[key] = value.usd * multiplier;
