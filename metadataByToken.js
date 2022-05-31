@@ -26,7 +26,7 @@ const metadata = async (client, address) => {
       }
       if (!metadata) {
         switch (process.env.DEPLOY_ENV) {
-          case 'mainnet':
+          case 'polygon-mainnet':
             metadata = polygonMainnetTokenMetadata[checkSummedAddress]
             break
           case 'mumbai':
@@ -44,7 +44,7 @@ const metadata = async (client, address) => {
           symbol: 'CUSTOM',
           decimals: 18,
           address: checkSummedAddress,
-          path: '/ERC20.svg'
+          path: '/crypto-logos/ERC20.svg'
         }
       }
       const tokenMetadata = {
