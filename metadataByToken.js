@@ -11,6 +11,7 @@ const metadata = async (client, address) => {
     try {
       const checkSummedAddress = ethers.utils.getAddress(address)
       let metadata = await cachedMetadataByToken(client, checkSummedAddress)
+      console.log(localTokenMetadata[checkSummedAddress])
       if (!metadata) {
         const fetchedMetadata = await fetchMetadata(client)
         fetchedMetadata.forEach(async token => {
@@ -26,7 +27,7 @@ const metadata = async (client, address) => {
       }
       if (!metadata) {
         switch (process.env.DEPLOY_ENV) {
-          case 'mainnet':
+          case 'polygon-mainnet':
             metadata = polygonMainnetTokenMetadata[checkSummedAddress]
             break
           case 'mumbai':
@@ -44,7 +45,7 @@ const metadata = async (client, address) => {
           symbol: 'CUSTOM',
           decimals: 18,
           address: checkSummedAddress,
-          path: '/ERC20.svg'
+          path: '/crypto-logos/ERC20.svg'
         }
       }
       const tokenMetadata = {
