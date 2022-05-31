@@ -1,7 +1,7 @@
 // Array of all supported tokens
-const polygonMainnetTokens = require('./constants/polygon-mainnet-tokens.json');
-const mumbaiTokens = require('./constants/polygon-mumbai-tokens.json');
-const localTokens = require('./constants/local-tokens.json');
+const polygonMainnetTokens = require('./constants/openq-polygon-mainnet-enumerable.json');
+const mumbaiTokens = require('./constants/openq-polygon-mumbai-enumerable.json');
+const localTokens = require('./constants/openq-local-enumerable.json');
 
 const fetchCachedMetadata = require('./utils/fetchCachedMetadata');
 const fetchMetadata = require('./utils/fetchMetadata');
@@ -11,36 +11,36 @@ const metadata = async (req, client) => {
 		const { query } = req;
 		const cursor = parseInt(query.cursor);
 		const limit = parseInt(query.limit);
-		const list = query.list
-		if(list === 'polygon'){
+		const list = query.list;
+		if (list === 'polygon') {
 
-		let tokenMetadata = [];
-		cachedMetadata = await fetchCachedMetadata(client, cursor, limit);
-		tokenMetadata = cachedMetadata.map(elem=>JSON.parse(elem));
-		if (tokenMetadata.length === 0) {
-			console.log('cache miss');
-			const fetchedMetadata= await fetchMetadata(client, cursor, limit);	
-			const paginatedTokens = fetchedMetadata.filter((elem, index) => {
-				return index >= cursor && index < limit + cursor;
-			});
-			tokenMetadata = paginatedTokens;
+			let tokenMetadata = [];
+			cachedMetadata = await fetchCachedMetadata(client, cursor, limit);
+			tokenMetadata = cachedMetadata.map(elem => JSON.parse(elem));
+			if (tokenMetadata.length === 0) {
+				console.log('cache miss');
+				const fetchedMetadata = await fetchMetadata(client, cursor, limit);
+				const paginatedTokens = fetchedMetadata.filter((elem, index) => {
+					return index >= cursor && index < limit + cursor;
+				});
+				tokenMetadata = paginatedTokens;
+			}
+			resolve(tokenMetadata);
 		}
-		resolve(tokenMetadata);
-		}
-		else if(list === 'constants'){
-			switch(process.env.DEPLOY_ENV){
-			case 'polygon-mainnet':
-				resolve(polygonMainnetTokens)
-				break;
-			case 'mumbai':
-				resolve(mumbaiTokens)
-				break;
+		else if (list === 'constants') {
+			switch (process.env.DEPLOY_ENV) {
+				case 'polygon-mainnet':
+					resolve(polygonMainnetTokens);
+					break;
+				case 'mumbai':
+					resolve(mumbaiTokens);
+					break;
 				case 'local':
-				resolve(localTokens)
-				break;
+					resolve(localTokens);
+					break;
 			}
 		}
-		else resolve([])
+		else resolve([]);
 	});
 	return promise;
 };
