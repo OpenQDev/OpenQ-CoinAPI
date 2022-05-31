@@ -11,7 +11,6 @@ const metadata = async (client, address) => {
     try {
       const checkSummedAddress = ethers.utils.getAddress(address)
       let metadata = await cachedMetadataByToken(client, checkSummedAddress)
-      console.log(localTokenMetadata[checkSummedAddress])
       if (!metadata) {
         const fetchedMetadata = await fetchMetadata(client)
         fetchedMetadata.forEach(async token => {
