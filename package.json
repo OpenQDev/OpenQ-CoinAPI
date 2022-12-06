@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
+	"private": true,
 	"scripts": {
 		"start": "node index.js && node cron.js",
 		"start:dev": "nodemon index.js && node cron.js",
