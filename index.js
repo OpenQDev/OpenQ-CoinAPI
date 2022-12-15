@@ -92,4 +92,4 @@ app.get("/staticMetadata/:type", async (req, res) => {
 
 app.listen(PORT);
 
-console.log(`Listening on ${PORT}`);
+console.log(`OpenQ-Coin-API on ${PORT}`);

@@ -7,6 +7,7 @@
 	"scripts": {
 		"start": "node index.js && node cron.js",
 		"start:dev": "nodemon index.js && node cron.js",
+		"start:local": "nodemon index.js && node cron.js",
 		"test": "jest"
 	},
 	"keywords": [],
