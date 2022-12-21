@@ -16,6 +16,6 @@ services:
       - ./.env
   redis:
     container_name: redis
-    image: redis:6.2.6-alpine
+    image: redis:6.2.8-alpine
     ports:
       - "6379:6379"
