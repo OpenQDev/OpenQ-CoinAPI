@@ -13,8 +13,9 @@ const metadataByToken = require('./metadataByToken');
 require('dotenv').config();
 
 // Prepare Redis
-const redisPort = 6379;
-const client = redis.createClient(redisPort, process.env.REDIS_URL);
+const redisUrl = `redis://${proces.env['REDIS_USERNAME']}:${process.env['REDIS_PASSWORD']}@${process.env['REDIS_HOST']}:${process.env['REDIS_PORT']}`
+
+const client = redis.createClient({ url: redisUrl });
 
 client.on('error', err => {
 	console.log(err);
