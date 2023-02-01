@@ -13,11 +13,27 @@ const metadataByToken = require('./metadataByToken');
 require('dotenv').config();
 
 // Prepare Redis
-const redisUrl = `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 
-const client = redis.createClient({ 
+let client;
+if(process.env.DEPLOY_ENV === 'local') {
+	const redisUrl = `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
+
+client = redis.createClient({ 
 	url: redisUrl,
  });
+}
+else{
+	const redisUrl = `rediss://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
+
+client = redis.createClient({ 
+	url: redisUrl,
+	socket: {
+		tls: true,
+		rejectUnauthorized: false,
+		cert: '...'
+	  }
+ });
+}
 
 client.on('error', err => {
 	console.log(err);
