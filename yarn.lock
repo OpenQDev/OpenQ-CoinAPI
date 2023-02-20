@@ -1312,10 +1312,10 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
-ethers@6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.0.2.tgz#e147424b3464ecca7af23e0e2f0b3b045641ccfd"
-  integrity sha512-YOHvShFjKordVEN7kVcKRp6xhpjq4ggZPcsAVuadXravZ7Z4qOflOEGfIaMnKp2ZQJqyR07iYVD6YVty4dI3Fw==
+ethers@6.0.5:
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.0.5.tgz#88434ce7884511280584ee724cccbe76fbbef093"
+  integrity sha512-qy0HV9NZpRXdFW6Q15o9WCIpKsxQUPjiJPR7EGK8NJO58CQh59Acz58Z+9uEAgcL1e/0Q1DGGm7+WVTjQuvT7g==
   dependencies:
     "@adraffy/ens-normalize" "1.8.9"
     "@noble/hashes" "1.1.2"
