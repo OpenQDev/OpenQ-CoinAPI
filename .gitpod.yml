@@ -1,2 +1,7 @@
 tasks:
   - command: docker-compose up
+ports:
+  - name: CoinAPI
+    port: 8081
+  - name: Redis
+    port: 6379
