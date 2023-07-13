@@ -1,0 +1,51 @@
+#git add . && git commit -m "updates" && git push && git tag -f staging-1.0.0 && git push origin -f staging-1.0.1
+name: Build + Push OpenQ-CoinAPI
+
+on:
+  push:
+    tags:
+      - "staging-*"
+      - "production-*"
+
+jobs:
+  build:
+    outputs:
+      ENVIRONMENT: ${{ steps.extract_environment.outputs.ENVIRONMENT }}
+    name: Build CoinAPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract environment from tag
+        id: extract_environment
+        run: |
+          ENVIRONMENT=$(echo "${{ github.ref_name }}" | sed 's/-.*//')
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: openq/openq-coinapi:${{ github.ref_name }}
+  tagHelm:
+    needs: build
+    uses: OpenQDev/OpenQ-Workflows/.github/workflows/tag.yml@main
+    with:
+      APP: coinapi
+      VERSION: ${{ github.ref_name }}
+      ENVIRONMENT: ${{ needs.build.outputs.ENVIRONMENT }}
+    secrets:
+      PAT: ${{ secrets.PAT }}
