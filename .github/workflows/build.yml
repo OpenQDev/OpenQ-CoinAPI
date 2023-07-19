@@ -11,7 +11,7 @@ jobs:
   build:
     outputs:
       ENVIRONMENT: ${{ steps.extract_environment.outputs.ENVIRONMENT }}
-    name: Build CoinAPI
+    name: Build OpenQ-CoinAPI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
